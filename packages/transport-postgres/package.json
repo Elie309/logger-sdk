@@ -1,0 +1,66 @@
+{
+  "name": "@elie309/transport-postgres",
+  "version": "0.0.0",
+  "description": "PostgreSQL storage transport for @elie309/logger (bring your own pg Pool)",
+  "license": "MIT",
+  "author": "Elie Saade",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Elie309/logger-sdk.git",
+    "directory": "packages/transport-postgres"
+  },
+  "keywords": [
+    "logger",
+    "postgres",
+    "postgresql",
+    "transport",
+    "logging"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint:pkg": "publint && attw --pack . --profile node16"
+  },
+  "dependencies": {
+    "@elie309/contracts": "workspace:^"
+  },
+  "peerDependencies": {
+    "@elie309/logger": "workspace:>=0.0.0 <1.0.0"
+  },
+  "devDependencies": {
+    "@elie309/logger": "workspace:>=0.0.0 <1.0.0",
+    "@elie309/test-utils": "workspace:^",
+    "@types/pg": "^8.15.0",
+    "pg": "^8.16.0"
+  }
+}
