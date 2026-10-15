@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LogEventSchema, LogLevelSchema } from "./event.js";
+import { LogEventSchema, LogLevelSchema, LogSourceSchema } from "./event.js";
 
 export const ApiErrorBodySchema = z.object({
   error: z.object({
@@ -14,6 +14,8 @@ export type ApiErrorBody = z.infer<typeof ApiErrorBodySchema>;
 export const LogQuerySchema = z.object({
   level: LogLevelSchema.optional(),
   minLevel: LogLevelSchema.optional(),
+  source: LogSourceSchema.optional(),
+  kind: z.string().optional(),
   service: z.string().optional(),
   environment: z.string().optional(),
   search: z.string().optional(),

@@ -84,6 +84,18 @@ describe("Logger", () => {
     expect(mem.events[0]?.attributes).toEqual({ region: "eu" });
   });
 
+  it("promotes source and kind to top-level fields", async () => {
+    const mem = new MemoryTransport();
+    const log = createLogger({ transports: [mem] });
+    log.error("x", { source: "ui", kind: "boundary", page: "/a" });
+    log.error("y", { source: "bogus" });
+    await log.flush();
+    expect(mem.events[0]).toMatchObject({ source: "ui", kind: "boundary" });
+    expect(mem.events[0]?.attributes).toEqual({ page: "/a" });
+    expect(mem.events[1]?.source).toBeUndefined();
+    expect(mem.events[1]?.attributes).toEqual({ source: "bogus" });
+  });
+
   it("inherits ambient request context", async () => {
     const mem = new MemoryTransport();
     const log = createLogger({ transports: [mem] });

@@ -1,8 +1,10 @@
 import {
   LEVEL_SEVERITY,
   LIMITS,
+  LOG_SOURCES,
   type LogEvent,
   type LogLevel,
+  type LogSource,
   SCHEMA_VERSION,
 } from "@elie309/contracts";
 import { getRequestContext } from "./context.js";
@@ -12,7 +14,13 @@ import { ConsoleTransport } from "./transports/console.js";
 import type { Attributes, LoggerOptions, Transport } from "./types.js";
 import { uuidv7 } from "./uuid.js";
 
-export const SDK_INFO = { name: "@elie309/logger", version: "0.0.0" } as const;
+declare const __SDK_VERSION__: string | undefined;
+
+/** Version is injected from package.json at build time (see tsup.config.ts). */
+export const SDK_INFO = {
+  name: "@elie309/logger",
+  version: typeof __SDK_VERSION__ === "string" ? __SDK_VERSION__ : "0.0.0-dev",
+} as const;
 
 const TRACE_KEYS = ["requestId", "traceId", "spanId"] as const;
 
@@ -166,6 +174,18 @@ export class Logger {
       const value = merged[key];
       if (typeof value === "string") event[key] = value;
       delete merged[key];
+    }
+
+    if (
+      typeof merged.source === "string" &&
+      (LOG_SOURCES as readonly string[]).includes(merged.source)
+    ) {
+      event.source = merged.source as LogSource;
+      delete merged.source;
+    }
+    if (typeof merged.kind === "string") {
+      event.kind = merged.kind.slice(0, 64);
+      delete merged.kind;
     }
 
     if (messageOrError instanceof Error) {

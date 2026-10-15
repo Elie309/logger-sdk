@@ -12,6 +12,11 @@ export const LIMITS = {
   maxErrorCauseDepth: 5,
 } as const;
 
+/** Where an event originated. Lets dashboards separate UI errors from backend ones. */
+export const LOG_SOURCES = ["ui", "action", "api", "server"] as const;
+export type LogSource = (typeof LOG_SOURCES)[number];
+export const LogSourceSchema = z.enum(LOG_SOURCES);
+
 export const LogLevelSchema = z.enum(LOG_LEVELS);
 
 export interface SerializedError {
@@ -41,6 +46,10 @@ export const LogEventSchema = z.object({
   environment: z.string().optional(),
   service: z.string().optional(),
   release: z.string().optional(),
+  /** Origin of the event (browser UI, server action, API handler, other server code). */
+  source: LogSourceSchema.optional(),
+  /** Free-form category within a source, e.g. `validation`, `boundary`, `db`. */
+  kind: z.string().max(64).optional(),
   requestId: z.string().optional(),
   traceId: z.string().optional(),
   spanId: z.string().optional(),

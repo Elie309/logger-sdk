@@ -15,7 +15,7 @@ export interface PostgresTransportOptions {
 }
 
 const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$/;
-const COLUMNS = 13;
+const COLUMNS = 15;
 const CHUNK = 500;
 
 export class PostgresTransport implements Transport {
@@ -43,10 +43,13 @@ export class PostgresTransport implements Transport {
         timestamp   timestamptz NOT NULL,
         level       text NOT NULL,
         message     text NOT NULL,
+        source      text, kind text,
         environment text, service text, release text,
         request_id  text, trace_id text, span_id text,
         error       jsonb, attributes jsonb, sdk jsonb
       );
+      ALTER TABLE ${t} ADD COLUMN IF NOT EXISTS source text;
+      ALTER TABLE ${t} ADD COLUMN IF NOT EXISTS kind text;
       CREATE INDEX IF NOT EXISTS ${index}_timestamp_idx ON ${t} (timestamp DESC);
       CREATE INDEX IF NOT EXISTS ${index}_level_idx ON ${t} (level, timestamp DESC);
     `;
@@ -67,6 +70,8 @@ export class PostgresTransport implements Transport {
           e.timestamp,
           e.level,
           e.message,
+          e.source ?? null,
+          e.kind ?? null,
           e.environment ?? null,
           e.service ?? null,
           e.release ?? null,
@@ -80,14 +85,14 @@ export class PostgresTransport implements Transport {
         const base = row * COLUMNS;
         const params = Array.from({ length: COLUMNS }, (_, c) => `$${base + c + 1}`);
         // jsonb columns are the last three
-        params[10] = `${params[10]}::jsonb`;
-        params[11] = `${params[11]}::jsonb`;
         params[12] = `${params[12]}::jsonb`;
+        params[13] = `${params[13]}::jsonb`;
+        params[14] = `${params[14]}::jsonb`;
         return `(${params.join(", ")})`;
       });
       await this.#pool.query(
         `INSERT INTO ${this.#table}
-          (id, timestamp, level, message, environment, service, release, request_id, trace_id, span_id, error, attributes, sdk)
+          (id, timestamp, level, message, source, kind, environment, service, release, request_id, trace_id, span_id, error, attributes, sdk)
          VALUES ${rows.join(", ")}
          ON CONFLICT (id) DO NOTHING`,
         values,
@@ -128,6 +133,8 @@ function rowToEvent(row: Record<string, unknown>): LogEvent {
     level: row.level as LogEvent["level"],
     message: row.message as string,
   } as LogEvent;
+  if (row.source) event.source = row.source as NonNullable<LogEvent["source"]>;
+  if (row.kind) event.kind = row.kind as string;
   if (row.environment) event.environment = row.environment as string;
   if (row.service) event.service = row.service as string;
   if (row.release) event.release = row.release as string;

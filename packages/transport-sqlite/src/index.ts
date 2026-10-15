@@ -43,6 +43,7 @@ export class SqliteTransport implements Transport {
         timestamp TEXT NOT NULL,
         level TEXT NOT NULL,
         message TEXT NOT NULL,
+        source TEXT, kind TEXT,
         environment TEXT, service TEXT, release TEXT,
         request_id TEXT, trace_id TEXT, span_id TEXT,
         error TEXT, attributes TEXT, sdk TEXT
@@ -50,10 +51,11 @@ export class SqliteTransport implements Transport {
       CREATE INDEX IF NOT EXISTS ${table}_timestamp_idx ON ${table} (timestamp);
       CREATE INDEX IF NOT EXISTS ${table}_level_idx ON ${table} (level, timestamp);
     `);
+    this.#addMissingColumns(table);
     this.#insert = this.#db.prepare(
       `INSERT OR IGNORE INTO ${table}
-        (id, timestamp, level, message, environment, service, release, request_id, trace_id, span_id, error, attributes, sdk)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, timestamp, level, message, source, kind, environment, service, release, request_id, trace_id, span_id, error, attributes, sdk)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     this.#prune();
   }
@@ -68,6 +70,8 @@ export class SqliteTransport implements Transport {
           e.timestamp,
           e.level,
           e.message,
+          e.source ?? null,
+          e.kind ?? null,
           e.environment ?? null,
           e.service ?? null,
           e.release ?? null,
@@ -101,6 +105,18 @@ export class SqliteTransport implements Transport {
     this.#db.close();
   }
 
+  /** Upgrade tables created by older versions that lack `source` / `kind`. */
+  #addMissingColumns(table: string): void {
+    const existing = new Set(
+      (this.#db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).map(
+        (c) => c.name,
+      ),
+    );
+    for (const column of ["source", "kind"]) {
+      if (!existing.has(column)) this.#db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} TEXT`);
+    }
+  }
+
   #prune(): void {
     this.#lastPrune = Date.now();
     if (this.#retentionDays === undefined) return;
@@ -117,6 +133,8 @@ function rowToEvent(row: Record<string, string | null>): LogEvent {
     level: row.level as LogEvent["level"],
     message: row.message as string,
   } as LogEvent;
+  if (row.source) event.source = row.source as NonNullable<LogEvent["source"]>;
+  if (row.kind) event.kind = row.kind;
   if (row.environment) event.environment = row.environment;
   if (row.service) event.service = row.service;
   if (row.release) event.release = row.release;

@@ -66,6 +66,8 @@ export function runTransportConformance(
       const event = makeEvent({
         level: "error",
         message: "boom",
+        source: "action",
+        kind: "db",
         environment: "prod",
         service: "api",
         release: "1.2.3",

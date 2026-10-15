@@ -31,8 +31,8 @@ describe("PostgresTransport (no database)", () => {
     } as const;
     await t.write([e, { ...e, id: "b" }]);
     expect(calls[0]?.text).toContain("ON CONFLICT (id) DO NOTHING");
-    expect(calls[0]?.text).toContain("$14");
-    expect(calls[0]?.values).toHaveLength(26);
+    expect(calls[0]?.text).toContain("$16");
+    expect(calls[0]?.values).toHaveLength(30);
   });
   it("rejects writes after close", async () => {
     const t = new PostgresTransport({ pool });
