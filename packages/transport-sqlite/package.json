@@ -1,6 +1,6 @@
 {
   "name": "@elie309/transport-sqlite",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "SQLite storage transport for @elie309/logger using node:sqlite (no native dependencies)",
   "license": "MIT",
   "author": "Elie Saade",
@@ -57,7 +57,7 @@
     "@elie309/logger": "workspace:>=0.0.0 <1.0.0"
   },
   "devDependencies": {
-    "@elie309/logger": "workspace:>=0.1.0",
+    "@elie309/logger": "workspace:>=0.2.0",
     "@elie309/test-utils": "workspace:^"
   }
 }
