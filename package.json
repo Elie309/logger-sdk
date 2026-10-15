@@ -19,6 +19,7 @@
     "test:coverage": "vitest run --coverage",
     "lint:pkg": "pnpm -r lint:pkg",
     "changeset": "changeset",
+    "version-packages": "changeset version && pnpm install --lockfile-only",
     "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
