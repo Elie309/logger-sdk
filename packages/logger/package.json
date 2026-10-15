@@ -1,6 +1,6 @@
 {
   "name": "@elie309/logger",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Structured, non-blocking logger SDK for TypeScript with batching, retries, redaction and pluggable transports",
   "license": "MIT",
   "author": "Elie Saade",

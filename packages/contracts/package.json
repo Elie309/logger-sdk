@@ -1,6 +1,6 @@
 {
   "name": "@elie309/contracts",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Shared event schemas and API contracts for the elie309 logger SDK",
   "license": "MIT",
   "author": "Elie Saade",
