@@ -1,6 +1,6 @@
 {
   "name": "@elie309/client",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Typed client for querying and streaming logs from an elie309 logger backend",
   "license": "MIT",
   "author": "Elie Saade",
